@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/prisma.service";
 import * as bcrypt from "bcrypt";
+import type { User } from "generated/prisma/client";
 
 @Injectable()
 export class TestService {
@@ -10,6 +11,16 @@ export class TestService {
 
     async deletrUser(){
         await this.prismaService.user.deleteMany(
+            {
+                where: {
+                    username: 'test'
+                }
+            }
+        );
+    }
+
+    async findUser(): Promise<User> {
+        return await this.prismaService.user.findUnique(
             {
                 where: {
                     username: 'test'

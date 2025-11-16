@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Patch, Post } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from "src/model/user.model";
 import { WebResponse } from "src/model/web.model";
 import { Auth } from "src/common/auth.decorator";
 import type { User } from "generated/prisma/client";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
 @Controller('/api/v1/users')
 export class UserController {
@@ -35,6 +36,7 @@ export class UserController {
         }
     }
 
+    @ApiBearerAuth('access-token')
     @Get('/current')
     @HttpCode(200)
     async get(
@@ -47,6 +49,7 @@ export class UserController {
         }
     }
 
+    @ApiBearerAuth('access-token')
     @Patch('/current')
     @HttpCode(200)
     async update(
@@ -57,6 +60,19 @@ export class UserController {
 
         return {
             data: result,
+        }
+    }
+
+    @ApiBearerAuth('access-token')
+    @Delete('/current')
+    @HttpCode(200)
+    async logout(
+        @Auth() user: User
+    ): Promise<WebResponse<boolean>> {
+        await this.userService.logout(user);
+
+        return {
+            data: true,
         }
     }
 }

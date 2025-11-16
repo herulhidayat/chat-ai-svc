@@ -7,7 +7,7 @@ export class RegisterUserRequest {
 export class UserResponse {
     username: string;
     name: string;
-    token?: string;
+    token?: string | null;
 }
 
 export class LoginUserRequest {

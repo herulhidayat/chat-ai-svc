@@ -233,4 +233,36 @@ describe('UserController', () => {
       expect(response.body.data.token).toBeDefined();
     });
   })
+
+  describe('DELETE /api/v1/users/current', () => {
+    beforeEach(async () => {
+      await testService.deletrUser();
+      await testService.createUser();
+    })
+
+    it('should be rejected if token is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/v1/users/current')
+        .set('Authorization', 'wrong')
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(401);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should be able to logout', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/v1/users/current')
+        .set('Authorization', 'test')
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toBe(true);
+
+      const user = await testService.findUser();  
+      expect(user.token).toBeNull();
+    });
+  })
 });
