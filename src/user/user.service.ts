@@ -7,6 +7,7 @@ import { Logger } from "winston";
 import { UserValidation } from "./user.validation";
 import * as bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
+import type { User } from "generated/prisma/client";
 @Injectable()
 
 export class UserService {
@@ -18,6 +19,20 @@ export class UserService {
     async register(request: RegisterUserRequest) : Promise<UserResponse> {
         this.logger.info(`UserService.register ${JSON.stringify(request)}`);
         const registerRequest:RegisterUserRequest = this.validationService.validate(UserValidation.REGISTER, request);
+
+        if(registerRequest.username.length < 3) {
+            throw new HttpException(
+                `Username must be at least 3 characters`,
+                400
+            )
+        }
+
+        if(registerRequest.password.length < 8) {
+            throw new HttpException(
+                `Password must be at least 8 characters`,
+                400
+            )
+        }
         
         const totalUserWithSameUsername = await this.prismaService.user.count({
             where: {
@@ -83,6 +98,13 @@ export class UserService {
             username: user.username,
             name: user.name,
             token: user.token
+        }
+    }
+
+    async get(user: User): Promise<UserResponse> {
+        return {
+            username: user.username,
+            name: user.name
         }
     }
 }
