@@ -20,13 +20,19 @@ export class TestService {
     }
 
     async findUser(): Promise<User> {
-        return await this.prismaService.user.findUnique(
+        const user = await this.prismaService.user.findUnique(
             {
                 where: {
                     username: 'test'
                 }
             }
         );
+
+        if (user) {
+            return user;
+        } else {
+            throw new Error('User not found');
+        }
     }
 
     async createUser(){
