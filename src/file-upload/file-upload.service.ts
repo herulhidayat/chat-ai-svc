@@ -5,6 +5,8 @@ import { ZodError } from 'zod';
 import { ExtractorService } from 'src/common/extractor.service';
 import { EmbedderService } from 'src/common/embedder.service';
 import { ChromaService } from 'src/chroma/chroma.service';
+import { DocumentUploadedResponse } from 'src/model/document.model';
+import { PrismaService } from 'src/common/prisma.service';
 
 @Injectable()
 export class FileUploadService {
@@ -13,9 +15,10 @@ export class FileUploadService {
         private extractorService: ExtractorService,
         private embedderService: EmbedderService,
         private chromaService: ChromaService,
+        private prismaService: PrismaService
     ) {}
 
-    async handleUploadFile(file: Express.Multer.File) {
+    async handleUploadFile(file: Express.Multer.File): Promise<DocumentUploadedResponse> {
         try {
             const { file: validatedFile } = this.validationService.validate(
                 FileUploadValidation.UPLOAD,
@@ -49,9 +52,21 @@ export class FileUploadService {
                 );
             }
 
+            const documentMetadata = await this.prismaService.document.create({
+                data: {
+                    doc_id: docId,
+                    name: file.filename,
+                    original_mime_type: file.mimetype,
+                    size: file.size,
+                    uploaded_at: new Date(),
+                    file_path: validatedFile.path
+                },
+            })
+
             return {
+                docId: documentMetadata.doc_id,
                 message: 'File uploaded successfully',
-                filePath: validatedFile.path
+                filePath: documentMetadata.file_path,
             };
         } catch (error) {
             if (error instanceof ZodError) {

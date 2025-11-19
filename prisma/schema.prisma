@@ -21,3 +21,14 @@ model User {
 
   @@map("users")
 }
+
+model Document {
+  doc_id             String   @id @db.VarChar(100)
+  name               String   @db.VarChar(100)
+  original_mime_type String   @db.VarChar(100)
+  size               Int
+  uploaded_at        DateTime
+  file_path          String
+
+  @@map("documents")
+}
