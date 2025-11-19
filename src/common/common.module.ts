@@ -7,6 +7,9 @@ import { ValidationService } from './validation.services';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
 import { AuthMiddleware } from './auth.middleware';
+import { ExtractorService } from './extractor.service';
+import { HttpModule } from '@nestjs/axios';
+import { EmbedderService } from './embedder.service';
 
 @Module({
     imports: [
@@ -17,12 +20,13 @@ import { AuthMiddleware } from './auth.middleware';
         ConfigModule.forRoot({
             isGlobal: true,
         }),
+        HttpModule
     ],
-    providers: [PrismaService, ValidationService, {
+    providers: [PrismaService, ValidationService, ExtractorService, EmbedderService, {
         provide: APP_FILTER,
         useClass: ErrorFilter
     }],
-    exports: [PrismaService, ValidationService],
+    exports: [PrismaService, ValidationService, ExtractorService, EmbedderService],
 })
 export class CommonModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
