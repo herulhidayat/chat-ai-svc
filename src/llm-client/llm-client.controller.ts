@@ -8,22 +8,28 @@ import { ApiBody } from '@nestjs/swagger';
 export class LlmClientController {
   constructor(
     private llmClientService: LlmClientService
-  ) {}
+  ) { }
 
   @Post('/chat')
   @HttpCode(200)
-  @ApiBody({ 
+  @ApiBody({
     type: ChatRequest,
     schema: {
       properties: {
         question: { type: 'string' },
         docId: { type: 'string' },
-      },
-      example: {
-        question: 'string',
-        docId: 'string'
+        sessionId: { type: 'string' },
       },
       required: ['question']
+    },
+    examples: {
+      'example 1': {
+        value: {
+          question: 'Berdasarkan dokumen yang diberikan, berikan ringkasan dari dokumen tersebut',
+          docId: 'string',
+          sessionId: 'string'
+        }
+      }
     }
   })
   async chat(

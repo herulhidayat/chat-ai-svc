@@ -32,3 +32,10 @@ model Document {
 
   @@map("documents")
 }
+
+model ChatHistory {
+  sessionId String @id @db.VarChar(100)
+  historyName String @db.VarChar(100)
+
+  @@map("chat_history")
+}

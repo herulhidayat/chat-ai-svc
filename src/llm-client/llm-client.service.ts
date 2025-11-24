@@ -5,7 +5,10 @@ import { lastValueFrom } from 'rxjs';
 import { ChromaService } from 'src/chroma/chroma.service';
 import { EmbedderService } from 'src/common/embedder.service';
 import { ChatRequest } from 'src/model/llm.model';
+import { RedisService } from 'src/redis/redis.service';
 import { Logger } from 'winston';
+import { randomUUID } from "crypto";
+import { ChatHistoryService } from 'src/chat-history/chat-history.service';
 
 @Injectable()
 export class LlmClientService {
@@ -14,12 +17,14 @@ export class LlmClientService {
         private embedderService: EmbedderService,
         private chromaService: ChromaService,
         private readonly httpService: HttpService,
-    ) {}
+        private redisService: RedisService,
+        private chatHistoryService: ChatHistoryService
+    ) { }
 
     async generatePrompt(request: ChatRequest): Promise<any> {
         this.logger.debug(`LlmClientService.generatePrompt ${JSON.stringify(request)}`);
 
-        if(request.question.length < 1) {
+        if (request.question.length < 1) {
             throw new HttpException(
                 `Prompt must be at least 1 character`,
                 400
@@ -28,39 +33,70 @@ export class LlmClientService {
 
         let context: string = '';
 
-        if(request?.docId) {
+        if (request?.docId) {
             const embedPrompt = await this.embedderService.embedText(request.question, 'http://10.12.120.32:8142/v1/embeddings');
             const searchSimilarity = await this.chromaService.searchSimilar(request?.docId, embedPrompt, 3);
 
             context = searchSimilarity?.documents?.[0]?.join('\n');
         }
 
-        const prompt = `
-            You are a document assistant. Use the context below to answer the user's question. 
+        let sessionId: any = request.sessionId;
+        if (!sessionId) {
+            const uuid = await randomUUID();
+            sessionId = uuid;
 
-            Context:
-            ${context}
-            
-            Question:
-            ${request.question}
-        `;
+            await this.chatHistoryService.create({ sessionId: uuid, historyName: request.question });
+        }
 
-        const response = await this.generateResponse(prompt);
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>sessionID", sessionId)
 
-        return response;
+        const key = this.buildChatKey(sessionId);
+        const history = (await this.redisService.get<Array<{ role: string; content: string }>>(key)) || [];
+
+        const messages: Array<{ role: string; content: string }> = [
+            { role: "system", content: "You are a helpful assistant." },
+            ...history,
+        ];
+
+        if (context) {
+            messages.push({
+                role: "user",
+                content: `
+                    You are a document assistant. Use the context below to answer the user's question. 
+
+                    Context:\n${context}
+
+                    Question:\n${request.question}
+                `
+            });
+        } else {
+            messages.push({ role: "user", content: request.question });
+        }
+
+        const response = await this.generateResponse(messages);
+
+        const answer = response?.choices?.[0]?.message?.content;
+
+        if (answer) {
+            history.push({ role: 'user', content: request.question });
+            history.push({ role: 'assistant', content: answer });
+            await this.redisService.set(key, history, 60 * 60);
+        }
+
+        return {
+            sessionId,
+            answer
+        };
     }
 
-    async generateResponse(prompt: string): Promise<any> {
+    async generateResponse(messages: Array<{ role: string; content: string }>): Promise<any> {
         try {
             const response = await lastValueFrom(
                 this.httpService.post(
-                    'http://10.12.120.43:8787/v1/chat/completions', 
+                    'http://10.12.120.43:8787/v1/chat/completions',
                     {
                         "model": "gpt-oss-20b",
-                        "messages": [
-                            {"role": "system", "content": "You are a helpful assistant."},
-                            {"role": "user", "content": prompt}
-                        ]
+                        "messages": messages
                     },
                     {
                         headers: {
@@ -70,11 +106,17 @@ export class LlmClientService {
                     }
                 )
             )
-    
+
             return response.data;
-        } catch (error) {  
+        } catch (error) {
             console.error('Error making external API call:', error);
             throw error;
         }
     }
+
+    private buildChatKey(sessionId?: string) {
+        return `chat:${sessionId}`;
+    }
+
+
 }
