@@ -5,13 +5,14 @@ WORKDIR /app
 
 ENV NODE_ENV=development
 ENV PRISMA_CLIENT_OUTPUT=./generated/prisma
+ARG DATABASE_URL
 
 COPY package*.json ./
 RUN npm ci
 
 COPY nest-cli.json tsconfig*.json prisma.config.ts ./
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN DATABASE_URL=${DATABASE_URL} npx prisma generate
 
 COPY src ./src
 RUN npm run build
@@ -33,4 +34,4 @@ COPY --from=builder /app/dist ./dist
 RUN mkdir -p /app/uploads
 
 EXPOSE 9876
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
