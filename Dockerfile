@@ -5,14 +5,15 @@ WORKDIR /app
 
 ENV NODE_ENV=development
 ENV PRISMA_CLIENT_OUTPUT=./generated/prisma
-ARG DATABASE_URL=postgresql://user:pass@localhost:5432/db
+ARG DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+ENV DATABASE_URL=${DATABASE_URL}
 
 COPY package*.json ./
 RUN npm ci
 
 COPY nest-cli.json tsconfig*.json prisma.config.ts ./
 COPY prisma ./prisma
-RUN DATABASE_URL=${DATABASE_URL} npx prisma generate
+RUN npx prisma generate
 
 COPY src ./src
 RUN npm run build
@@ -34,4 +35,4 @@ COPY --from=builder /app/dist ./dist
 RUN mkdir -p /app/uploads
 
 EXPOSE 9876
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
