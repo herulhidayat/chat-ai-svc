@@ -1,0 +1,17 @@
+.env
+.env.*
+.git
+.gitignore
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+dist
+generated
+uploads
+coverage
+.vscode
+.idea
+tmp
+logs
+*.log
