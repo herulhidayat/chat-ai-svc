@@ -5,7 +5,7 @@ WORKDIR /app
 
 ENV NODE_ENV=development
 ENV PRISMA_CLIENT_OUTPUT=./generated/prisma
-ARG DATABASE_URL
+ARG DATABASE_URL=postgresql://user:pass@localhost:5432/db
 
 COPY package*.json ./
 RUN npm ci
