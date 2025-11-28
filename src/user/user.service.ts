@@ -7,7 +7,8 @@ import { Logger } from "winston";
 import { UserValidation } from "./user.validation";
 import * as bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
-import type { User } from "generated/prisma/client";
+import type { User } from 'src/model/user.model';
+
 @Injectable()
 
 export class UserService {

@@ -19,3 +19,10 @@ export class UpdateUserRequest {
     name?: string;
     password?: string;
 }
+
+export type User = {
+    name: string;
+    username: string;
+    password: string;
+    token: string | null;
+}
