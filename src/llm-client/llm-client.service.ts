@@ -93,7 +93,7 @@ export class LlmClientService {
         try {
             const response = await lastValueFrom(
                 this.httpService.post(
-                    'http://10.12.120.43:8787/v1/chat/completions',
+                    `${process.env.LLM_BASE_URL}`,
                     {
                         "model": "gpt-oss-20b",
                         "messages": messages
