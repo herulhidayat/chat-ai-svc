@@ -40,17 +40,17 @@ export class LlmClientService {
             context = searchSimilarity?.documents?.[0]?.join('\n');
         }
 
-        let sessionId: any = request.sessionId;
-        if (!sessionId) {
+        let session_id: any = request.session_id;
+        if (!session_id) {
             const uuid = await randomUUID();
-            sessionId = uuid;
+            session_id = uuid;
 
-            await this.chatHistoryService.create({ sessionId: uuid, historyName: request.question });
+            await this.chatHistoryService.create({ session_id: uuid, history_name: request.question });
         }
 
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>sessionID", sessionId)
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>session_id", session_id)
 
-        const key = this.buildChatKey(sessionId);
+        const key = this.buildChatKey(session_id);
         const history = (await this.redisService.get<Array<{ role: string; content: string }>>(key)) || [];
 
         const messages: Array<{ role: string; content: string }> = [
@@ -84,7 +84,7 @@ export class LlmClientService {
         }
 
         return {
-            sessionId,
+            session_id,
             answer
         };
     }
@@ -114,8 +114,8 @@ export class LlmClientService {
         }
     }
 
-    private buildChatKey(sessionId?: string) {
-        return `chat:${sessionId}`;
+    private buildChatKey(session_id?: string) {
+        return `chat:${session_id}`;
     }
 
 

@@ -34,8 +34,8 @@ model Document {
 }
 
 model ChatHistory {
-  sessionId String @id @db.VarChar(100)
-  historyName String @db.VarChar(100)
+  session_id String @id @db.VarChar(100)
+  history_name String @db.VarChar(100)
 
   @@map("chat_history")
 }

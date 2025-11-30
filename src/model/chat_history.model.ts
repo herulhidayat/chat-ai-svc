@@ -1,14 +1,14 @@
 export class ChatHistoryRequest {
-    sessionId: string;
-    historyName: string;
+    session_id: string;
+    history_name: string;
 }
 
 export class ChatHistoryGetOneRequest {
-    sessionId: string;
+    session_id: string;
 }
 
 export class ChatHistoryResponse {
-    sessionId: string;
-    historyName: string;
+    session_id: string;
+    history_name: string;
     data: any;
 }

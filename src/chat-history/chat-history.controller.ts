@@ -13,16 +13,16 @@ export class ChatHistoryController {
     type: ChatHistoryRequest,
     schema: {
       properties: {
-        sessionId: { type: 'string' },
-        historyName: { type: 'string' },
+        session_id: { type: 'string' },
+        history_name: { type: 'string' },
       },
-      required: ['sessionId', 'historyName']
+      required: ['session_id', 'history_name']
     },
     examples: {
       'example 1': {
         value: {
-          sessionId: 'string',
-          historyName: 'string'
+          session_id: 'string',
+          history_name: 'string'
         }
       }
     }
@@ -36,7 +36,7 @@ export class ChatHistoryController {
   @Get('/get-one')
   @HttpCode(200)
   @ApiQuery({
-    name: 'sessionId',
+    name: 'session_id',
     required: true,
     type: String,
   })

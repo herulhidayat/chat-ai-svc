@@ -9,35 +9,35 @@ export class ChatHistoryService {
         private redisService: RedisService,
         private prismaService: PrismaService
     ) { }
-    async create({ sessionId, historyName }: ChatHistoryRequest): Promise<ChatHistoryResponse> {
+    async create({ session_id, history_name }: ChatHistoryRequest): Promise<ChatHistoryResponse> {
         const chatHistory = await this.prismaService.chatHistory.create({
             data: {
-                sessionId: sessionId,
-                historyName: historyName
+                session_id: session_id,
+                history_name: history_name
             }
         });
 
         console.log(">>>>>>>>>>>>>>>>>>>>>>>>", chatHistory)
 
         return {
-            sessionId: chatHistory.sessionId,
-            historyName: chatHistory.historyName,
+            session_id: chatHistory.session_id,
+            history_name: chatHistory.history_name,
             data: null,
         }
     }
 
-    async get({ sessionId }: ChatHistoryGetOneRequest): Promise<ChatHistoryResponse> {
-        const data = await this.redisService.get<Array<{ role: string; content: string }>>(this.buildChatKey(sessionId));
+    async get({ session_id }: ChatHistoryGetOneRequest): Promise<ChatHistoryResponse> {
+        const data = await this.redisService.get<Array<{ role: string; content: string }>>(this.buildChatKey(session_id));
         console.log(">>>>>>>>>>>>>>>>>>>>>>>>", data)
         const chatHistory = await this.prismaService.chatHistory.findUnique({
             where: {
-                sessionId: sessionId
+                session_id: session_id
             }
         });
 
         return {
-            sessionId: sessionId,
-            historyName: chatHistory?.historyName || '',
+            session_id: session_id,
+            history_name: chatHistory?.history_name || '',
             data: data,
         }
     }
@@ -45,13 +45,13 @@ export class ChatHistoryService {
     async getAll(): Promise<ChatHistoryResponse[]> {
         const chatHistories = await this.prismaService.chatHistory.findMany();
         return chatHistories.map((chatHistory) => ({
-            sessionId: chatHistory.sessionId,
-            historyName: chatHistory.historyName,
+            session_id: chatHistory.session_id,
+            history_name: chatHistory.history_name,
             data: null,
         }));
     }
 
-    private buildChatKey(sessionId?: string) {
-        return `chat:${sessionId}`;
+    private buildChatKey(session_id?: string) {
+        return `chat:${session_id}`;
     }
 }

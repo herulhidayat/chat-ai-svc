@@ -18,7 +18,7 @@ export class LlmClientController {
       properties: {
         question: { type: 'string' },
         docId: { type: 'string' },
-        sessionId: { type: 'string' },
+        session_id: { type: 'string' },
       },
       required: ['question']
     },
@@ -27,7 +27,7 @@ export class LlmClientController {
         value: {
           question: 'Berdasarkan dokumen yang diberikan, berikan ringkasan dari dokumen tersebut',
           docId: 'string',
-          sessionId: 'string'
+          session_id: 'string'
         }
       }
     }
