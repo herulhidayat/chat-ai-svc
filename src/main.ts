@@ -8,6 +8,9 @@ async function bootstrap() {
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
+  app.enableCors({
+    origin: 'http://chat.herul.dev',
+  })
 
   const config = new DocumentBuilder()
     .setTitle('Chat AI Management Service')
